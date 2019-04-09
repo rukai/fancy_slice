@@ -1,0 +1,8 @@
+[package]
+name = "fancy_slice"
+version = "0.1.0"
+authors = ["Rukai <rubickent@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+byteorder = "1"
