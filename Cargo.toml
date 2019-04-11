@@ -1,8 +1,19 @@
 [package]
 name = "fancy_slice"
 version = "0.1.0"
-authors = ["Rukai <rubickent@gmail.com>"]
 edition = "2018"
+authors = ["Rukai <rubickent@gmail.com>"]
+description = "A library that provides reflection for tree structures"
+license = "MIT"
+repository = "https://github.com/rukai/fancy_slice"
+keywords = ["fancy", "slice"]
+categories = ["parsing"]
+
+[package.metadata.docs.rs]
+features = [ "debug" ]
 
 [dependencies]
 byteorder = "1"
+
+[features]
+debug = []
