@@ -6,3 +6,6 @@ rust:
 script:
   - cargo test
   - cargo test --release
+  - cargo test --features debug
+  - cargo test --release
+  - cargo test --release --features debug

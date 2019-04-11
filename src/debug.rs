@@ -106,8 +106,37 @@ impl<'a> FancySlice<'a> {
 
     /// Requires `debug` feature.
     /// Returns the offset into the original slice.
-    pub fn offset() -> usize {
+    pub fn offset(&self) -> usize {
         self.start
+    }
+
+    /// Debug display each byte in hex
+    pub fn hex<I: SliceIndex<[u8], Output=[u8]>>(&self, range: I) -> String {
+        let data = &self.data[self.start..self.end][range];
+        let mut string = String::new();
+        for (i, byte) in data.iter().enumerate() {
+            if i != 0 && i % 2 == 0 {
+                string.push_str(" ");
+            }
+            string.push_str(&format!("{:02x}", byte));
+        }
+        string
+    }
+
+    /// Debug display each byte as an ascii if valid otherwise display as '.'
+    pub fn ascii<I: SliceIndex<[u8], Output=[u8]>>(&self, range: I) -> String {
+        let data = &self.data[self.start..self.end][range];
+        let mut string = String::new();
+        for byte in data {
+            let ascii = *byte as char;
+            if ascii.is_ascii_graphic() {
+                string.push(ascii);
+            }
+            else {
+                string.push('.');
+            }
+        }
+        string
     }
 }
 
@@ -115,7 +144,7 @@ impl<'a> FancySlice<'a> {
 fn bound(bound: Bound<&usize>, or: usize) -> usize {
     match bound {
         Bound::Included(a) => *a,
-        Bound::Excluded(a) => *a,
+        Bound::Excluded(a) => *a, // TODO: +-1 !?!?
         Bound::Unbounded => or
     }
 }
