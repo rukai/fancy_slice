@@ -74,7 +74,7 @@ impl<'a> FancySlice<'a> {
         string
     }
 
-    /// Debug display each byte as an ascii if valid otherwise display as '.'
+    /// Debug display each byte as an ascii character if valid, otherwise display as '.'
     pub fn ascii<I: SliceIndex<[u8], Output=[u8]>>(&self, range: I) -> String {
         let data = &self.data[range];
         let mut string = String::new();

@@ -123,7 +123,7 @@ impl<'a> FancySlice<'a> {
         string
     }
 
-    /// Debug display each byte as an ascii if valid otherwise display as '.'
+    /// Debug display each byte as an ascii character if valid, otherwise display as '.'
     pub fn ascii<I: SliceIndex<[u8], Output=[u8]>>(&self, range: I) -> String {
         let data = &self.data[self.start..self.end][range];
         let mut string = String::new();
@@ -138,8 +138,111 @@ impl<'a> FancySlice<'a> {
         }
         string
     }
+
+    /// Requires `debug` feature.
+    pub fn find_i8(&self, search_for: i8) -> Vec<usize> {
+        let mut result = vec!();
+
+        for address in 0..self.data.len() {
+            let value = self.data[address] as i8;
+            if value == search_for {
+                result.push(address);
+            }
+        }
+
+        result
+    }
+
+    /// Requires `debug` feature.
+    pub fn find_u8(&self, search_for: u8) -> Vec<usize> {
+        let mut result = vec!();
+
+        for address in 0..self.data.len() {
+            let value = self.data[address];
+            if value == search_for {
+                result.push(address);
+            }
+        }
+
+        result
+    }
+
+    /// Requires `debug` feature.
+    pub fn find_i16(&self, search_for: i16) -> Vec<usize> {
+        let mut result = vec!();
+
+        for address in 0..self.data.len() - 2 {
+            let value = (&self.data[address..]).read_i16::<BigEndian>().unwrap();
+            if value == search_for {
+                result.push(address);
+            }
+        }
+
+        result
+    }
+
+    /// Requires `debug` feature.
+    pub fn find_u16(&self, search_for: u16) -> Vec<usize> {
+        let mut result = vec!();
+
+        for address in 0..self.data.len() - 2 {
+            let value = (&self.data[address..]).read_u16::<BigEndian>().unwrap();
+            if value == search_for {
+                result.push(address);
+            }
+        }
+
+        result
+    }
+
+    /// Requires `debug` feature.
+    pub fn find_i32(&self, search_for: i32) -> Vec<usize> {
+        let mut result = vec!();
+
+        for address in 0..self.data.len() - 4 {
+            let value = (&self.data[address..]).read_i32::<BigEndian>().unwrap();
+            if value == search_for {
+                result.push(address);
+            }
+        }
+
+        result
+    }
+
+    /// Requires `debug` feature.
+    pub fn find_u32(&self, search_for: u32) -> Vec<usize> {
+        let mut result = vec!();
+
+        for address in 0..self.data.len() - 4 {
+            let value = (&self.data[address..]).read_u32::<BigEndian>().unwrap();
+            if value == search_for {
+                result.push(address);
+            }
+        }
+
+        result
+    }
+
+    /// Requires `debug` feature.
+    pub fn find_offset_pointers(&self, search_for_address: usize) -> Vec<usize> {
+        let mut result = vec!();
+
+        for address in 0..self.data.len() - 4 {
+            let value = (&self.data[address..]).read_u32::<BigEndian>().unwrap();
+            if address + value as usize == search_for_address {
+                result.push(address);
+            }
+        }
+
+        result
+    }
 }
 
+#[derive(Debug)]
+pub struct PointerSearchResults {
+    pub absolute: Vec<usize>,
+    pub relative: Vec<usize>,
+}
 
 fn bound(bound: Bound<&usize>, or: usize) -> usize {
     match bound {
