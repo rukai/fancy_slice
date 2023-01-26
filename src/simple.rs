@@ -1,7 +1,7 @@
 use byteorder::{BigEndian, ReadBytesExt};
 
-use std::str;
 use std::slice::SliceIndex;
+use std::str;
 
 #[derive(Clone, Copy)]
 pub struct FancySlice<'a> {
@@ -13,13 +13,13 @@ impl<'a> FancySlice<'a> {
         FancySlice { data }
     }
 
-    pub fn relative_fancy_slice<I: SliceIndex<[u8], Output=[u8]>>(&self, range: I) -> FancySlice {
+    pub fn relative_fancy_slice<I: SliceIndex<[u8], Output = [u8]>>(&self, range: I) -> FancySlice {
         FancySlice {
-            data: &self.data[range]
+            data: &self.data[range],
         }
     }
 
-    pub fn relative_slice<I: SliceIndex<[u8], Output=[u8]>>(&self, range: I) -> &[u8] {
+    pub fn relative_slice<I: SliceIndex<[u8], Output = [u8]>>(&self, range: I) -> &[u8] {
         &self.data[range]
     }
 
@@ -50,9 +50,15 @@ impl<'a> FancySlice<'a> {
     pub fn str(&self, offset: usize) -> Result<&str, String> {
         let data = &self.data[offset..];
         if let Some(length) = data.iter().position(|x| *x == 0) {
-            str::from_utf8(&data[..length]).map_err(|x| format!("{}", x))
-        }
-        else {
+            let string_bytes = &data[..length];
+            str::from_utf8(string_bytes).map_err(|x| {
+                let hex = self.hex(offset..offset+length);
+                let ascii = self.ascii(offset..offset+length);
+                format!(
+                    "Failed to parse value at {offset} to utf8 string: {x}\nValue in hex: {hex}\nValue in ascii: {ascii}"
+                )
+            })
+        } else {
             Err(String::from("String was not terminated"))
         }
     }
@@ -62,12 +68,12 @@ impl<'a> FancySlice<'a> {
     }
 
     /// Debug display each byte in hex
-    pub fn hex<I: SliceIndex<[u8], Output=[u8]>>(&self, range: I) -> String {
+    pub fn hex<I: SliceIndex<[u8], Output = [u8]>>(&self, range: I) -> String {
         let data = &self.data[range];
         let mut string = String::new();
         for (i, byte) in data.iter().enumerate() {
             if i != 0 && i % 2 == 0 {
-                string.push_str(" ");
+                string.push(' ');
             }
             string.push_str(&format!("{:02x}", byte));
         }
@@ -75,15 +81,14 @@ impl<'a> FancySlice<'a> {
     }
 
     /// Debug display each byte as an ascii character if valid, otherwise display as '.'
-    pub fn ascii<I: SliceIndex<[u8], Output=[u8]>>(&self, range: I) -> String {
+    pub fn ascii<I: SliceIndex<[u8], Output = [u8]>>(&self, range: I) -> String {
         let data = &self.data[range];
         let mut string = String::new();
         for byte in data {
             let ascii = *byte as char;
             if ascii.is_ascii_graphic() {
                 string.push(ascii);
-            }
-            else {
+            } else {
                 string.push('.');
             }
         }
